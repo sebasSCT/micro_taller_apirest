@@ -28,7 +28,7 @@ public class GeneralController {
     private final GeneralService generalService;
 
     @Operation(summary = "Listar todos los usuarios",
-            description = "Obtiene una lista de todos los usuarios registrados en el sistema")
+            description = "Obtiene una lista paginada de los usuarios registrados en el sistema, más los metadatos de la paginación")
     @ApiResponse(responseCode = "200", description = "Lista de usuarios obtenida exitosamente",
             content = @Content(schema = @Schema(implementation = MensajeDTO.class)))
     @ApiResponse(responseCode = "404", description = "No se encontraron usuarios")
@@ -36,7 +36,7 @@ public class GeneralController {
     @GetMapping("/listar-usuarios")
     public ResponseEntity<Page<ItemUsuarioDTO>> listarUsuarios(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) throws Exception {
+            @RequestParam(defaultValue = "1") int size) throws Exception {
 
         Pageable pageable = PageRequest.of(page, size);
         Page<ItemUsuarioDTO> usuariosPage = generalService.listarUsuarios(pageable);
