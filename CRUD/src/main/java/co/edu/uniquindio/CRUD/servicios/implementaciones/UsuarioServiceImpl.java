@@ -30,6 +30,7 @@ public class UsuarioServiceImpl implements UsuarioService {
         usuarioDB.setNombre(usuario.nombre());
         usuarioDB.setApellido(usuario.apellido());
         usuarioDB.setEmail(usuario.email());
+        usuarioDB.setEstado(true);
 
         BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         String passwordEncriptada = passwordEncoder.encode( usuario.password() );
@@ -47,7 +48,12 @@ public class UsuarioServiceImpl implements UsuarioService {
 
 
     @Override
-    public void actualizarUsuario(ActualizarUsuarioDTO usuario) throws Exception {
+    public void actualizarUsuario(ActualizarUsuarioDTO usuario, String idtoken) throws Exception {
+
+        if(!(usuario.codigo().equals(idtoken))){
+            throw new Exception("No puedes realizar ésta operación, porque no eres tú");
+        }
+
 
         Optional<Usuario> usuarioDB = usuarioRepository.findById(usuario.codigo());
 
@@ -55,16 +61,26 @@ public class UsuarioServiceImpl implements UsuarioService {
             throw new Exception("El usuario no existe");
         }
 
+        if (!usuarioDB.get().isEstado()) {
+            throw new Exception("El usuario está inactivo");
+        }
+
+
         Usuario usuarioActual = usuarioDB.get();
         usuarioActual.setNombre(usuario.nombre());
         usuarioActual.setApellido(usuario.apellido());
         usuarioActual.setEmail(usuario.email());
+        usuarioActual.setEstado(true);
 
         usuarioRepository.save(usuarioActual);
     }
 
     @Override
-    public DetalleUsuarioDTO obtenerUsuario(String idCuenta) throws Exception {
+    public DetalleUsuarioDTO obtenerUsuario(String idCuenta, String idtoken) throws Exception {
+
+        if(!(idCuenta.equals(idtoken))){
+            throw new Exception("No puedes realizar ésta operación, porque no eres tú");
+        }
 
         Optional<Usuario> usuarioDB = usuarioRepository.findById(idCuenta);
 
@@ -78,12 +94,20 @@ public class UsuarioServiceImpl implements UsuarioService {
     }
 
     @Override
-    public void eliminarUsuario(String idCuenta) throws Exception {
+    public void eliminarUsuario(String idCuenta, String idtoken) throws Exception {
+
+        if(!(idCuenta.equals(idtoken))){
+            throw new Exception("No puedes realizar ésta operación, porque no eres tú");
+        }
 
         Optional<Usuario> usuarioDB = usuarioRepository.findById(idCuenta);
 
         if (usuarioDB.isEmpty()) {
             throw new Exception("El usuario no existe");
+        }
+
+        if(!usuarioDB.get().isEstado()){
+            throw new Exception("El usuario está inactivo");
         }
 
         Usuario usuarioActual = usuarioDB.get();

@@ -40,7 +40,6 @@ public class FiltroToken extends OncePerRequestFilter {
             try {
                 if (requestURI.startsWith("/api/user")) {
                     if (token != null) {
-                        Jws<Claims> jws = jwtUtils.parseJwt(token);
                         error = false;
                     } else {
                         crearRespuestaError("No hay un Token", HttpServletResponse.SC_FORBIDDEN,

@@ -27,3 +27,12 @@ services:
          - ME_CONFIG_MONGODB_ADMINUSERNAME=root
          - ME_CONFIG_MONGODB_ADMINPASSWORD=example
          - ME_CONFIG_MONGODB_URL=mongodb://root:example@mongo_database:27017/
+
+   app-crud:
+    build:
+      context: ./CRUD
+    ports:
+      - "8084:8084"
+    environment:
+      
+

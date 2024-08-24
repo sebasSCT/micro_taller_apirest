@@ -9,11 +9,11 @@ public interface UsuarioService{
 
     String registrarUsuario(RegistroUsuarioDTO usuario)throws Exception;
 
-    void actualizarUsuario(ActualizarUsuarioDTO usuario)throws Exception;
+    void actualizarUsuario(ActualizarUsuarioDTO usuario, String idtoken)throws Exception;
 
-    DetalleUsuarioDTO obtenerUsuario(String idCuenta) throws Exception;
+    DetalleUsuarioDTO obtenerUsuario(String idCuenta, String idtoken) throws Exception;
 
-    void eliminarUsuario(String idCuenta)throws Exception;
+    void eliminarUsuario(String idCuenta, String idtoken)throws Exception;
 
     void cambiarPassword(CambioPasswordDTO cambioPasswordDTO) throws Exception;
 

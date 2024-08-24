@@ -8,13 +8,13 @@ import co.edu.uniquindio.CRUD.dtos.usuario.RegistroUsuarioDTO;
 import co.edu.uniquindio.CRUD.servicios.interfaces.AutenticacionService;
 import co.edu.uniquindio.CRUD.servicios.interfaces.UsuarioService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,17 +28,22 @@ public class AutenticacionController {
     private final UsuarioService usuarioService;
 
     @Operation(summary = "Iniciar sesión",
-            description = "Autentica un usuario y devuelve un token JWT")
+            description = "Autentica un usuario y devuelve un token JWT o un mensaje de error")
     @ApiResponse(responseCode = "200", description = "Login exitoso",
             content = @Content(schema = @Schema(implementation = MensajeDTO.class)))
-    @ApiResponse(responseCode = "401", description = "Credenciales inválidas")
-    @ApiResponse(responseCode = "404", description = "Usuario no encontrado")
+    @ApiResponse(responseCode = "401", description = "Credenciales inválidas",
+            content = @Content(schema = @Schema(implementation = MensajeDTO.class)))
+    @ApiResponse(responseCode = "500", description = "Error interno del servidor",
+            content = @Content(schema = @Schema(implementation = MensajeDTO.class)))
     @PostMapping("/login")
-    public ResponseEntity<MensajeDTO<TokenDTO>> login(
-            @Parameter(description = "Credenciales de login", required = true)
-            @Valid @RequestBody LoginDTO loginDTO) throws Exception {
-        TokenDTO tokenDTO = autenticacionServicio.login(loginDTO);
-        return ResponseEntity.ok().body(new MensajeDTO<>(false, tokenDTO));
+    public ResponseEntity<MensajeDTO<?>> login(@Valid @RequestBody LoginDTO loginDTO) {
+        try {
+            TokenDTO tokenDTO = autenticacionServicio.login(loginDTO);
+            return ResponseEntity.ok().body(new MensajeDTO<>(false, tokenDTO));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(new MensajeDTO<>(true, e.getMessage()));
+        }
     }
 
     @Operation(summary = "Registrar nuevo usuario",
@@ -49,7 +54,6 @@ public class AutenticacionController {
     @ApiResponse(responseCode = "409", description = "El usuario ya existe")
     @PostMapping("/registrar-usuario")
     public ResponseEntity<MensajeDTO<String>> registrarse(
-            @Parameter(description = "Datos del nuevo usuario", required = true)
             @Valid @RequestBody RegistroUsuarioDTO usuarioDTO) throws Exception {
         usuarioService.registrarUsuario(usuarioDTO);
         return ResponseEntity.ok().body(new MensajeDTO<>(false, "Usuario registrado correctamente"));
@@ -63,7 +67,6 @@ public class AutenticacionController {
     @ApiResponse(responseCode = "404", description = "Usuario no encontrado")
     @PutMapping("/cambiar-password")
     public ResponseEntity<MensajeDTO<String>> cambiarPassword(
-            @Parameter(description = "Datos para cambio de contraseña", required = true)
             @Valid @RequestBody CambioPasswordDTO cambioPasswordDTO) throws Exception {
         usuarioService.cambiarPassword(cambioPasswordDTO);
         return ResponseEntity.ok().body(new MensajeDTO<>(false, "Contraseña actualizada con éxito"));

@@ -9,6 +9,7 @@ public record LoginDTO(
         @NotNull
         @Length(max=50)
         @Email
+        @NotBlank(message = "El nombre de usuario es obligatorio")
         String email,
         @NotBlank
         String password) {
