@@ -33,6 +33,13 @@ services:
       context: ./CRUD
     ports:
       - "8084:8084"
+      - "8082:8082"
     environment:
+      - user=root
+      - password=example
+      - host=mongo_database
+      - port=27017
+      - db=crud
+      
       
 
