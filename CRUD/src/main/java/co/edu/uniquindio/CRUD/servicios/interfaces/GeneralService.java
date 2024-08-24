@@ -1,11 +1,11 @@
 package co.edu.uniquindio.CRUD.servicios.interfaces;
 
 import co.edu.uniquindio.CRUD.dtos.usuario.ItemUsuarioDTO;
-
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface GeneralService {
 
-    List<ItemUsuarioDTO> listarUsuarios() throws Exception;
+    Page<ItemUsuarioDTO> listarUsuarios(Pageable pageable) throws Exception;
 
 }

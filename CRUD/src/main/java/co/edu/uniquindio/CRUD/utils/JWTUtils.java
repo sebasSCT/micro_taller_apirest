@@ -1,4 +1,4 @@
-package co.edu.uniquindio.CRUD;
+package co.edu.uniquindio.CRUD.utils;
 
 import io.jsonwebtoken.*;
 import org.springframework.beans.factory.annotation.Value;

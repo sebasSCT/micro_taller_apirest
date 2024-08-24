@@ -5,10 +5,13 @@ import co.edu.uniquindio.CRUD.dtos.usuario.ItemUsuarioDTO;
 import co.edu.uniquindio.CRUD.repositorios.UsuarioRepository;
 import co.edu.uniquindio.CRUD.servicios.interfaces.GeneralService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -17,21 +20,21 @@ public class GeneralServiceImpl implements GeneralService {
     private final UsuarioRepository usuarioRepository;
 
     @Override
-    public List<ItemUsuarioDTO> listarUsuarios() throws Exception{
+    public Page<ItemUsuarioDTO> listarUsuarios(Pageable pageable) throws Exception {
+        Page<Usuario> usuariosPage = usuarioRepository.findAll(pageable);
 
-        List<Usuario> usuarios = usuarioRepository.findAll();
-
-        if (usuarios.isEmpty()) {
+        if (usuariosPage.isEmpty()) {
             throw new Exception("No hay usuarios");
         }
 
-        List<ItemUsuarioDTO> usuariosDTO = new ArrayList<>();
+        List<ItemUsuarioDTO> usuariosDTO = usuariosPage.getContent().stream()
+                .map(usuario -> new ItemUsuarioDTO(
+                        usuario.getCodigo(),
+                        usuario.getEmail(),
+                        usuario.getNombre(),
+                        usuario.getApellido()))
+                .collect(Collectors.toList());
 
-        for (Usuario usuario : usuarios) {
-            usuariosDTO.add(new ItemUsuarioDTO(usuario.getCodigo(), usuario.getEmail(), usuario.getNombre(), usuario.getApellido()));
-        }
-
-        return usuariosDTO;
-
+        return new PageImpl<>(usuariosDTO, pageable, usuariosPage.getTotalElements());
     }
 }

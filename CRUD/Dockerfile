@@ -12,5 +12,5 @@ RUN gradle bootJar
 FROM eclipse-temurin:21-jdk-jammy
 ARG JAR_FILE=build/libs/*.jar
 COPY --from=build /home/gradle/src/build/libs/*.jar app.jar
-EXPOSE 8081
+EXPOSE 8084
 ENTRYPOINT ["java","-jar","/app.jar"]

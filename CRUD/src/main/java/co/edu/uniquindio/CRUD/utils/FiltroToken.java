@@ -1,10 +1,8 @@
-package co.edu.uniquindio.CRUD;
+package co.edu.uniquindio.CRUD.utils;
 
 import co.edu.uniquindio.CRUD.dtos.general.MensajeDTO;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.security.SignatureException;
 import jakarta.servlet.FilterChain;

@@ -1,6 +1,6 @@
 package co.edu.uniquindio.CRUD.servicios.implementaciones;
 
-import co.edu.uniquindio.CRUD.JWTUtils;
+import co.edu.uniquindio.CRUD.utils.JWTUtils;
 import co.edu.uniquindio.CRUD.documentos.Usuario;
 import co.edu.uniquindio.CRUD.dtos.general.LoginDTO;
 import co.edu.uniquindio.CRUD.dtos.autenticacionJwt.TokenDTO;

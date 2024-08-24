@@ -1,11 +1,10 @@
 package co.edu.uniquindio.CRUD.controladores;
 
-import co.edu.uniquindio.CRUD.JWTUtils;
+import co.edu.uniquindio.CRUD.utils.JWTUtils;
 import co.edu.uniquindio.CRUD.dtos.general.MensajeDTO;
 import co.edu.uniquindio.CRUD.dtos.usuario.ActualizarUsuarioDTO;
 import co.edu.uniquindio.CRUD.dtos.usuario.DetalleUsuarioDTO;
 import co.edu.uniquindio.CRUD.servicios.interfaces.UsuarioService;
-import io.jsonwebtoken.Claims;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -33,7 +32,7 @@ public class UsuarioController {
             description = "Actualiza la información del perfil de un usuario existente")
     @ApiResponse(responseCode = "200", description = "Usuario actualizado correctamente",
             content = @Content(schema = @Schema(implementation = MensajeDTO.class)))
-    @ApiResponse(responseCode = "400", description = "Datos de actualización inválidos")
+    @ApiResponse(responseCode = "403", description = "No autorizado para actualizar éste usuario")
     @ApiResponse(responseCode = "404", description = "Usuario no encontrado")
     @PutMapping("/editar-perfil")
     public ResponseEntity<MensajeDTO<String>> actualizarUsuario(
