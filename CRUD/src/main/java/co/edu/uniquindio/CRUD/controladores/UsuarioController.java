@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @SecurityRequirement(name = "bearerAuth")
-@RequestMapping("/api/user")
+@RequestMapping("/api/usuarios/{codigo}")
 @RequiredArgsConstructor
 @Tag(name = "Usuario", description = "Controlador para operaciones propias del usuario")
 public class UsuarioController {
@@ -34,7 +34,7 @@ public class UsuarioController {
             content = @Content(schema = @Schema(implementation = MensajeDTO.class)))
     @ApiResponse(responseCode = "403", description = "No autorizado para actualizar éste usuario")
     @ApiResponse(responseCode = "404", description = "Usuario no encontrado")
-    @PutMapping("/editar-perfil")
+    @PutMapping
     public ResponseEntity<MensajeDTO<String>> actualizarUsuario(
             @Valid @RequestBody ActualizarUsuarioDTO actualizarUsuarioDTO, HttpServletRequest request) throws Exception {
         String token = getToken(request);
@@ -49,7 +49,7 @@ public class UsuarioController {
             content = @Content(schema = @Schema(implementation = MensajeDTO.class)))
     @ApiResponse(responseCode = "404", description = "Usuario no encontrado")
     @ApiResponse(responseCode = "403", description = "No autorizado para eliminar este usuario")
-    @DeleteMapping("/eliminar/{codigo}")
+    @DeleteMapping
     public ResponseEntity<MensajeDTO<String>> eliminarCuenta(
             @Parameter(description = "Código del usuario a eliminar", required = true)
             @PathVariable String codigo, HttpServletRequest request) throws Exception {
@@ -65,7 +65,7 @@ public class UsuarioController {
             content = @Content(schema = @Schema(implementation = MensajeDTO.class)))
     @ApiResponse(responseCode = "404", description = "Usuario no encontrado")
     @ApiResponse(responseCode = "403", description = "No autorizado para ver este usuario")
-    @GetMapping("/obtener/{codigo}")
+    @GetMapping
     public ResponseEntity<MensajeDTO<DetalleUsuarioDTO>> obtenerCliente(
             @Parameter(description = "Código del usuario", required = true)
             @PathVariable String codigo, HttpServletRequest request) throws Exception {

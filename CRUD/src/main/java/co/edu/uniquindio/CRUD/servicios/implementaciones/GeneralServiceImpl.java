@@ -2,6 +2,7 @@ package co.edu.uniquindio.CRUD.servicios.implementaciones;
 
 import co.edu.uniquindio.CRUD.documentos.Usuario;
 import co.edu.uniquindio.CRUD.dtos.usuario.ItemUsuarioDTO;
+import co.edu.uniquindio.CRUD.excepciones.NoHayUsuariosException;
 import co.edu.uniquindio.CRUD.repositorios.UsuarioRepository;
 import co.edu.uniquindio.CRUD.servicios.interfaces.GeneralService;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +25,7 @@ public class GeneralServiceImpl implements GeneralService {
         Page<Usuario> usuariosPage = usuarioRepository.findAll(pageable);
 
         if (usuariosPage.isEmpty()) {
-            throw new Exception("No hay usuarios");
+            throw new NoHayUsuariosException("No hay usuarios");
         }
 
         List<ItemUsuarioDTO> usuariosDTO = usuariosPage.getContent().stream()

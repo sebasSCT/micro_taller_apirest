@@ -5,6 +5,8 @@ import co.edu.uniquindio.CRUD.dtos.general.CambioPasswordDTO;
 import co.edu.uniquindio.CRUD.dtos.usuario.ActualizarUsuarioDTO;
 import co.edu.uniquindio.CRUD.dtos.usuario.DetalleUsuarioDTO;
 import co.edu.uniquindio.CRUD.dtos.usuario.RegistroUsuarioDTO;
+import co.edu.uniquindio.CRUD.excepciones.DatosIncompletosException;
+import co.edu.uniquindio.CRUD.excepciones.UsuarioExisteException;
 import co.edu.uniquindio.CRUD.repositorios.UsuarioRepository;
 import co.edu.uniquindio.CRUD.servicios.interfaces.UsuarioService;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +25,13 @@ public class UsuarioServiceImpl implements UsuarioService {
     public String registrarUsuario(RegistroUsuarioDTO usuario) throws Exception {
 
         if (existeEmail(usuario.email()))
-            throw new Exception("El email ya existe");
+            throw new UsuarioExisteException("El usuario ya existe");
+
+        if(usuario.email().isEmpty() ||
+        usuario.nombre().isEmpty() || usuario.password().isEmpty() ||
+        usuario.apellido().isEmpty()){
+            throw new DatosIncompletosException("Datos de registro inválidos o incompletos");
+        }
 
         Usuario usuarioDB = new Usuario();
 
@@ -122,8 +130,12 @@ public class UsuarioServiceImpl implements UsuarioService {
 
         Optional<Usuario> usuario = usuarioRepository.findByEmail(cambioPasswordDTO.email());
 
+        if(cambioPasswordDTO.email().isEmpty() || cambioPasswordDTO.nuevaPassword().isEmpty()){
+            throw new DatosIncompletosException("Datos de cambio de contraseña inválidos o incompletos");
+        }
+
         if (usuario.isEmpty()) {
-            throw new Exception("El usuario no existe");
+            throw new UsuarioExisteException("El usuario no existe");
         } else {
             BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
             String passwordEncriptada = passwordEncoder.encode(cambioPasswordDTO.nuevaPassword());

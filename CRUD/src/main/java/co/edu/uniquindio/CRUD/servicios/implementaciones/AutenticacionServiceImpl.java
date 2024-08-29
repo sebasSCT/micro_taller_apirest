@@ -1,5 +1,9 @@
 package co.edu.uniquindio.CRUD.servicios.implementaciones;
 
+import co.edu.uniquindio.CRUD.excepciones.CredencialesInvalidasException;
+import co.edu.uniquindio.CRUD.excepciones.DatosIncompletosException;
+import co.edu.uniquindio.CRUD.excepciones.UsuarioInactivoException;
+import co.edu.uniquindio.CRUD.excepciones.UsuarioNoEncontradoException;
 import co.edu.uniquindio.CRUD.utils.JWTUtils;
 import co.edu.uniquindio.CRUD.documentos.Usuario;
 import co.edu.uniquindio.CRUD.dtos.general.LoginDTO;
@@ -22,12 +26,16 @@ public class AutenticacionServiceImpl implements AutenticacionService {
     @Override
     public TokenDTO login(LoginDTO loginDTO) throws Exception {
 
+        if(loginDTO.password().isEmpty() || loginDTO.email().isEmpty()){
+            throw new DatosIncompletosException("Datos de entrada incompletos");
+        }
+
         BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
         Object[] datos = buscarCorreo(loginDTO);
 
         if (!passwordEncoder.matches(loginDTO.password(), datos[3].toString())) {
-            throw new Exception("La contraseña ingresada es incorrecta");
+            throw new CredencialesInvalidasException("Credenciales incorrectas");
         }
 
         return new TokenDTO(crearToken(datos));
@@ -54,7 +62,7 @@ public class AutenticacionServiceImpl implements AutenticacionService {
         Optional<Usuario> usuario = usuarioRepository.findByEmail(loginDTO.email());
 
         if (usuario.isEmpty()) {
-            throw new Exception("El usuario no existe");
+            throw new UsuarioNoEncontradoException("Usuario no encontrado");
         }else if(usuario.get().isEstado()){
 
             correo = usuario.get().getEmail();
@@ -64,7 +72,7 @@ public class AutenticacionServiceImpl implements AutenticacionService {
             apellido = usuario.get().getApellido();
 
         }else{
-            throw new Exception("Estás inactivo");
+            throw new UsuarioInactivoException("Usuario inactivo");
         }
 
         return new Object[]{correo, nombre, codigo, password, apellido };

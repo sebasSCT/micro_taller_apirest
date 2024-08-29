@@ -36,7 +36,7 @@ public class FiltroToken extends OncePerRequestFilter {
             boolean error = true;
 
             try {
-                if (requestURI.startsWith("/api/user")) {
+                if (requestURI.startsWith("/api/usuarios")) {
                     if (token != null) {
                         error = false;
                     } else {
