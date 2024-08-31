@@ -5,8 +5,7 @@ import co.edu.uniquindio.CRUD.dtos.general.CambioPasswordDTO;
 import co.edu.uniquindio.CRUD.dtos.usuario.ActualizarUsuarioDTO;
 import co.edu.uniquindio.CRUD.dtos.usuario.DetalleUsuarioDTO;
 import co.edu.uniquindio.CRUD.dtos.usuario.RegistroUsuarioDTO;
-import co.edu.uniquindio.CRUD.excepciones.DatosIncompletosException;
-import co.edu.uniquindio.CRUD.excepciones.UsuarioExisteException;
+import co.edu.uniquindio.CRUD.excepciones.*;
 import co.edu.uniquindio.CRUD.repositorios.UsuarioRepository;
 import co.edu.uniquindio.CRUD.servicios.interfaces.UsuarioService;
 import lombok.RequiredArgsConstructor;
@@ -56,23 +55,30 @@ public class UsuarioServiceImpl implements UsuarioService {
 
 
     @Override
-    public void actualizarUsuario(ActualizarUsuarioDTO usuario, String idtoken) throws Exception {
+    public void actualizarUsuario(String idUsuario,ActualizarUsuarioDTO usuario, String idtoken) throws Exception {
 
         if(!(usuario.codigo().equals(idtoken))){
-            throw new Exception("No puedes realizar ésta operación, porque no eres tú");
+            throw new NoAutorizadoException("No puedes realizar ésta operación");
         }
 
+        if(usuario.email().isEmpty() ||
+                usuario.nombre().isEmpty() ||
+                usuario.apellido().isEmpty()){
+            throw new DatosIncompletosException("Datos de registro inválidos o incompletos");
+        }
+
+        if (existeEmail(usuario.email()))
+            throw new UsuarioExisteException("El usuario ya existe");
 
         Optional<Usuario> usuarioDB = usuarioRepository.findById(usuario.codigo());
 
         if (usuarioDB.isEmpty()) {
-            throw new Exception("El usuario no existe");
+            throw new UsuarioNoEncontradoException("El usuario no existe");
         }
 
         if (!usuarioDB.get().isEstado()) {
-            throw new Exception("El usuario está inactivo");
+            throw new UsuarioInactivoException("El usuario está inactivo");
         }
-
 
         Usuario usuarioActual = usuarioDB.get();
         usuarioActual.setNombre(usuario.nombre());
@@ -105,17 +111,17 @@ public class UsuarioServiceImpl implements UsuarioService {
     public void eliminarUsuario(String idCuenta, String idtoken) throws Exception {
 
         if(!(idCuenta.equals(idtoken))){
-            throw new Exception("No puedes realizar ésta operación, porque no eres tú");
+            throw new NoAutorizadoException("No puedes realizar ésta operación");
         }
 
         Optional<Usuario> usuarioDB = usuarioRepository.findById(idCuenta);
 
         if (usuarioDB.isEmpty()) {
-            throw new Exception("El usuario no existe");
+            throw new UsuarioNoEncontradoException("El usuario no existe");
         }
 
         if(!usuarioDB.get().isEstado()){
-            throw new Exception("El usuario está inactivo");
+            throw new UsuarioInactivoException("El usuario está inactivo");
         }
 
         Usuario usuarioActual = usuarioDB.get();
@@ -132,6 +138,10 @@ public class UsuarioServiceImpl implements UsuarioService {
 
         if(cambioPasswordDTO.email().isEmpty() || cambioPasswordDTO.nuevaPassword().isEmpty()){
             throw new DatosIncompletosException("Datos de cambio de contraseña inválidos o incompletos");
+        }
+
+        if(!usuario.get().isEstado()){
+            throw new UsuarioInactivoException("El usuario no está activo");
         }
 
         if (usuario.isEmpty()) {

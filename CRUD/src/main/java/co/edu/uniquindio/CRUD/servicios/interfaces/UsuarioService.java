@@ -9,7 +9,7 @@ public interface UsuarioService{
 
     String registrarUsuario(RegistroUsuarioDTO usuario)throws Exception;
 
-    void actualizarUsuario(ActualizarUsuarioDTO usuario, String idtoken)throws Exception;
+    void actualizarUsuario(String idUsuario, ActualizarUsuarioDTO usuario, String idtoken)throws Exception;
 
     DetalleUsuarioDTO obtenerUsuario(String idCuenta, String idtoken) throws Exception;
 

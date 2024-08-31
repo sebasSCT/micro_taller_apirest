@@ -171,14 +171,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/MensajeDTO'
-        '403':
-          description: No autorizado para actualizar este usuario
+        '404':
+          description: Usuario no encontrado
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/MensajeDTO'
-        '404':
-          description: Usuario no encontrado
+        '409':
+          description: Usuario ya existe
           content:
             application/json:
               schema:
@@ -218,14 +218,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/MensajeDTO'
-        '403':
-          description: No autorizado para eliminar este usuario
+        '404':
+          description: Usuario no encontrado
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/MensajeDTO'
-        '404':
-          description: Usuario no encontrado
+        '403':
+          description: Usuario inactivo
           content:
             application/json:
               schema:
@@ -260,12 +260,6 @@ paths:
                 $ref: '#/components/schemas/DetalleUsuarioDTO'
         '401':
           description: No autorizado
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/MensajeDTO'
-        '403':
-          description: No autorizado para ver este usuario
           content:
             application/json:
               schema:
@@ -372,13 +366,10 @@ components:
       properties:
         email:
           type: string
-        passwordActual:
-          type: string
         nuevaPassword:
           type: string
       required:
         - email
-        - passwordActual
         - nuevaPassword
 
     ActualizarUsuarioDTO:
