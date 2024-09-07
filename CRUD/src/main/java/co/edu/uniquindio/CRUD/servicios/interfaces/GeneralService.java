@@ -8,4 +8,5 @@ public interface GeneralService {
 
     Page<ItemUsuarioDTO> listarUsuarios(Pageable pageable) throws Exception;
 
+    void enviarLinkRecuperacion(String email) throws Exception;
 }

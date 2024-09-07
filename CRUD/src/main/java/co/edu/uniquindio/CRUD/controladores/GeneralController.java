@@ -3,9 +3,10 @@ package co.edu.uniquindio.CRUD.controladores;
 import co.edu.uniquindio.CRUD.dtos.general.MensajeDTO;
 import co.edu.uniquindio.CRUD.dtos.usuario.ItemUsuarioDTO;
 import co.edu.uniquindio.CRUD.dtos.usuario.PageItemUsuarioDTO;
-import co.edu.uniquindio.CRUD.excepciones.NoHayUsuariosException;
+import co.edu.uniquindio.CRUD.excepciones.*;
 import co.edu.uniquindio.CRUD.servicios.interfaces.GeneralService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -15,10 +16,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.data.domain.Pageable;
 
 
@@ -102,7 +100,7 @@ public class GeneralController {
     @GetMapping("/usuarios")
     public ResponseEntity<?> listarUsuarios(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "1") int size) throws Exception {
+            @RequestParam(defaultValue = "1") int size) {
         try {
             Pageable pageable = PageRequest.of(page, size);
             Page<ItemUsuarioDTO> usuariosPage = generalService.listarUsuarios(pageable);
@@ -113,6 +111,39 @@ public class GeneralController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new MensajeDTO<>(true, e.getMessage()));
+        }
+    }
+
+    @Operation(summary = "Enviar email de recuperación de contraseña",
+            description = "Envía un email al usuario que solicitó recuperar la contraseña, incluyendo un token de autenticación")
+    @ApiResponse(responseCode = "200", description = "Correo enviado exitosamente", content = @Content(schema = @Schema(implementation = MensajeDTO.class)))
+    @ApiResponse(responseCode = "404", description = "Correo electrónico no encontrado en la base de datos", content = @Content(schema = @Schema(implementation = MensajeDTO.class)))
+    @ApiResponse(responseCode = "400", description = "Formato de correo electrónico inválido", content = @Content(schema = @Schema(implementation = MensajeDTO.class)))
+    @ApiResponse(responseCode = "503", description = "Servidor de correo no disponible", content = @Content(schema = @Schema(implementation = MensajeDTO.class)))
+    @ApiResponse(responseCode = "429", description = "Límite de envío de correos alcanzado", content = @Content(schema = @Schema(implementation = MensajeDTO.class)))
+    @ApiResponse(responseCode = "500", description = "Error interno del servidor", content = @Content(schema = @Schema(implementation = MensajeDTO.class)))
+    @GetMapping("/email/password/{email}")
+    public ResponseEntity<MensajeDTO<String>> enviarLinkRecuperacion(
+            @Parameter(description = "Correo electrónico del usuario", required = true)
+            @PathVariable String email)  {
+        try {
+            generalService.enviarLinkRecuperacion(email);
+            return ResponseEntity.ok().body(new MensajeDTO<>(false, "Revisa el correo y copia el token de autenticación"));
+        } catch (UsuarioNoEncontradoException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new MensajeDTO<>(true, "Correo electrónico no encontrado en la base de datos"));
+        } catch (CorreoInvalidoException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new MensajeDTO<>(true, "Formato de correo electrónico inválido"));
+        } catch (LimiteEnvioAlcanzadoException e) {
+            return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+                    .body(new MensajeDTO<>(true, "Límite de envío de correos alcanzado. Intente más tarde"));
+        }catch (ServidorCorreoNoDisponibleException e) {
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                    .body(new MensajeDTO<>(true, "Servidor de correo no disponible. Intente más tarde"));
+        }  catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new MensajeDTO<>(true, "Error interno del servidor"));
         }
     }
 }

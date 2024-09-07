@@ -15,7 +15,7 @@ public interface UsuarioService{
 
     void eliminarUsuario(String idCuenta, String idtoken)throws Exception;
 
-    void cambiarPassword(CambioPasswordDTO cambioPasswordDTO) throws Exception;
+    void cambiarPassword(CambioPasswordDTO cambioPasswordDTO, String idUsuario) throws Exception;
 
 }
 

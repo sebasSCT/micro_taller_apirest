@@ -13,7 +13,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
@@ -103,7 +102,14 @@ public class UsuarioController {
 
     }
 
-
+    @Operation(summary = "Buscar un usuario usuario",
+            description = "Si el usuario dado el código, existe, entonces se devuelve el usuario sino el respectivo mensaje de la excepción")
+    @ApiResponse(responseCode = "401", description = "No autorizado",
+            content = @Content(schema = @Schema(implementation = MensajeDTO.class)))
+    @ApiResponse(responseCode = "404", description = "Usuario no encontrado",
+            content = @Content(schema = @Schema(implementation = MensajeDTO.class)))
+    @ApiResponse(responseCode = "500", description = "Error interno del servidor",
+            content = @Content(schema = @Schema(implementation = MensajeDTO.class)))
     @GetMapping
     public ResponseEntity<MensajeDTO<?>> obtenerCliente(
             @Parameter(description = "Código del usuario", required = true)

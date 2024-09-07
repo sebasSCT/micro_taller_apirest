@@ -57,7 +57,7 @@ public class UsuarioServiceImpl implements UsuarioService {
     @Override
     public void actualizarUsuario(String idUsuario,ActualizarUsuarioDTO usuario, String idtoken) throws Exception {
 
-        if(!(usuario.codigo().equals(idtoken))){
+        if(!(usuario.codigo().equals(idtoken)) || !(idUsuario.equals(idtoken)) ){
             throw new NoAutorizadoException("No puedes realizar ésta operación");
         }
 
@@ -67,14 +67,14 @@ public class UsuarioServiceImpl implements UsuarioService {
             throw new DatosIncompletosException("Datos de registro inválidos o incompletos");
         }
 
-        if (existeEmail(usuario.email()))
-            throw new UsuarioExisteException("El usuario ya existe");
-
         Optional<Usuario> usuarioDB = usuarioRepository.findById(usuario.codigo());
 
         if (usuarioDB.isEmpty()) {
             throw new UsuarioNoEncontradoException("El usuario no existe");
         }
+
+        if (existeEmail(usuario.email()) && !usuarioDB.get().getCodigo().equals(idUsuario))
+            throw new UsuarioExisteException("El usuario ya existe");
 
         if (!usuarioDB.get().isEstado()) {
             throw new UsuarioInactivoException("El usuario está inactivo");
@@ -132,11 +132,11 @@ public class UsuarioServiceImpl implements UsuarioService {
     }
 
     @Override
-    public void cambiarPassword(CambioPasswordDTO cambioPasswordDTO) throws Exception {
+    public void cambiarPassword(CambioPasswordDTO cambioPasswordDTO, String idUsuario) throws Exception {
 
-        Optional<Usuario> usuario = usuarioRepository.findByEmail(cambioPasswordDTO.email());
+        Optional<Usuario> usuario = usuarioRepository.findById(idUsuario);
 
-        if(cambioPasswordDTO.email().isEmpty() || cambioPasswordDTO.nuevaPassword().isEmpty()){
+        if(cambioPasswordDTO.nuevaPassword().isEmpty()){
             throw new DatosIncompletosException("Datos de cambio de contraseña inválidos o incompletos");
         }
 

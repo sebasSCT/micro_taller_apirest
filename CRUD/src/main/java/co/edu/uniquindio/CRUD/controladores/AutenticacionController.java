@@ -8,11 +8,15 @@ import co.edu.uniquindio.CRUD.dtos.usuario.RegistroUsuarioDTO;
 import co.edu.uniquindio.CRUD.excepciones.*;
 import co.edu.uniquindio.CRUD.servicios.interfaces.AutenticacionService;
 import co.edu.uniquindio.CRUD.servicios.interfaces.UsuarioService;
+import co.edu.uniquindio.CRUD.utils.JWTUtils;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -27,6 +31,7 @@ public class AutenticacionController {
 
     private final AutenticacionService autenticacionServicio;
     private final UsuarioService usuarioService;
+    private final JWTUtils jwtUtils;
 
     @Operation(summary = "Iniciar sesión",
             description = "Autentica un usuario y devuelve un token JWT o un mensaje de error")
@@ -105,12 +110,25 @@ public class AutenticacionController {
             content = @Content(schema = @Schema(implementation = MensajeDTO.class)))
     @ApiResponse(responseCode = "500", description = "Error interno del servidor",
             content = @Content(schema = @Schema(implementation = MensajeDTO.class)))
-    @PatchMapping("/password")
+    @SecurityRequirement(name = "bearerAuth")
+    @PatchMapping("/password/{codigo}")
     public ResponseEntity<MensajeDTO<String>> cambiarPassword(
-            @Valid @RequestBody CambioPasswordDTO cambioPasswordDTO) throws Exception {
+            @Parameter(description = "Código del usuario", required = true)
+            @PathVariable String codigo,
+            @Valid @RequestBody CambioPasswordDTO cambioPasswordDTO,
+            HttpServletRequest request) throws Exception {
         try{
-            usuarioService.cambiarPassword(cambioPasswordDTO);
+            String token = getToken(request);
+            String idToken = jwtUtils.parseJwt(token).getBody().getSubject();
+
+            if(!idToken.equals(codigo)){
+                throw new NoAutorizadoException("No puedes actualizar éste usuario");
+            }
+            usuarioService.cambiarPassword(cambioPasswordDTO,codigo);
             return ResponseEntity.ok().body(new MensajeDTO<>(false, "Contraseña actualizada con éxito"));
+        }catch(NoAutorizadoException e){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(new MensajeDTO<>(true, e.getMessage()));
         }catch (DatosIncompletosException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(new MensajeDTO<>(true, e.getMessage()));
@@ -124,5 +142,12 @@ public class AutenticacionController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new MensajeDTO<>(true, e.getMessage()));
         }
+    }
+
+    private String getToken(HttpServletRequest req) {
+        String header = req.getHeader("Authorization");
+        if (header != null && header.startsWith("Bearer "))
+            return header.replace("Bearer ", "");
+        return null;
     }
 }

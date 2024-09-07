@@ -26,6 +26,18 @@ public class JWTUtils {
                 .compact();
 
     }
+
+    public String generarTokenPassword(String idUser){
+        Instant now = Instant.now();
+        return Jwts.builder()
+                .setSubject(idUser)
+                .setIssuedAt(Date.from(now))
+                .setExpiration(Date.from(now.plus(5L, ChronoUnit.MINUTES)))
+                .signWith( getKey() )
+                .compact();
+
+    }
+
     public Jws<Claims> parseJwt(String jwtString) throws ExpiredJwtException,
             UnsupportedJwtException, MalformedJwtException, IllegalArgumentException {
         return Jwts.parserBuilder()
